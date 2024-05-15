@@ -1,0 +1,37 @@
+[ensemble]
+    ne = 50
+    state = ["injrate", "prodrate"]
+    transform = true
+    prior_injrate = [["mean", "init_injrate.npz"],
+                     ["var", 64000], # sigma = 0.1% of interval
+                     ["limits", 0.0, 8000.0]]
+
+    prior_prodrate = [["mean", "init_prodrate.npz"],
+                      ["var", 324000.0], # sigma = 0.1% of interval
+                      ["limits", 0.0, 18000.0]]
+
+[optim]
+    maxiter = 20
+    alpha_max = 0.4
+    alpha_maxiter = 5
+
+[fwdsim]
+    npv_const = [['wop', 600.0], # [USD/Sm³]
+                 ['wgp', 17.0],  # [USD/Sm³]
+                 ['wwp', 38.0],  # [USD/Sm³]
+                 ['wwi', 18.0],  # [USD/Sm³]
+                 ['wem', 150],   # [USD/ton]
+                 ['disc', 0.08]]
+
+    path_to_windpower = '../data/windpower_ensemble.npy'
+    ecalc_yamlfile = 'ecalc_config.yaml' 
+    num_profiles = 50
+    
+    parallel    = 50
+    sim_limit   = 24000.0
+    simoptions  = [#['mpi', 'mpirun -np 3'],
+                   ['sim_flag', '--parsing-strictness=low']]
+    runfile     = 'DROGON'
+    reportpoint = 'report_dates.csv'
+    reporttype  = 'dates'
+    datatype    = ['fopt', 'fgpt', 'fwpt', 'fwit', 'wthp a5', 'wthp a6']

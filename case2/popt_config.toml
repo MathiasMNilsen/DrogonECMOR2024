@@ -1,0 +1,46 @@
+[ensemble]
+    ne = 20
+    state = ['a', 'b', 'c']
+    transform = true
+
+    prior_a = [['mean', [-1.9, -1.9, -1.4]],
+               ['var', 0.5],
+               ['limits', -5, 5]]
+
+    prior_b = [['mean', [0, 0, 0]],
+               ['var', 1.0],
+               ['limits', -10, 10]]
+
+    prior_c = [['mean', [0, 0, 0]],
+               ['var', 2.0],
+               ['limits', -20, 20]]
+
+[optim]
+    maxiter   = 20
+    tol  = 0.0000001
+    alpha  = 0.05
+    alpha_maxiter = 5
+    restartsave = false
+    restart = false
+    hessian = false
+
+[fwdsim]
+    npv_const = [["wop", 600.0], # [Sm³/d]
+                 ["wgp", 17.0],  # [Sm³/d]
+                 ["wwp", 38.0],  # [Sm³/d]
+                 ["wwi", 18.0],  # [Sm³/d]
+                 ["wem", 150],
+                 ["disc", 0.08]]
+    
+    path_to_windpower = '../data/windpower_ensemble.npy'
+    ecalc_yamlfile = 'ecalc_config.yaml' 
+    num_profiles = 20
+    
+    parallel    = 5
+    sim_limit   = 24000.0
+    simoptions  = [['mpi', 'mpirun -np 4'],
+                   ['sim_flag', '--parsing-strictness=low']]
+    runfile     = "DROGON"
+    reportpoint = "report_dates.csv"
+    reporttype  = "dates"
+    datatype    = ["fopt", "fgpt", "fwpt", "fwit", "wthp a5", "wthp a6"]
