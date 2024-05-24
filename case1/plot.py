@@ -155,7 +155,7 @@ def plot_pareto_npv_vs_em():
                        elinewidth=1.75)
 
     ax[0].set_ylabel('NPV [Billion USD]')
-    ax[0].set_xlabel('Emissions [kilo tonnes]')
+    ax[0].set_xlabel('Emissions [kilotonnes]')
     ax[0].set_title('wind + gas')
 
 
@@ -163,7 +163,7 @@ def plot_pareto_npv_vs_em():
     for w, weight in enumerate(weights):
         ax[1].scatter(em_ref[w], npv_ref[w], color=colors(weight), zorder=2, label=rf'$\omega={weight}$', ec='gray', lw=0.5, s=45)
 
-    ax[1].set_xlabel('Emissions [kilo tonnes]')
+    ax[1].set_xlabel('Emissions [kilotonnes]')
     ax[1].legend(loc=(1.01, 0.075), fontsize=11)
     ax[1].set_title('only gas')
 
@@ -239,7 +239,7 @@ def plot_prod_data():
 
 if __name__ == '__main__':
 
-    plot_pareto_front()
+    #plot_pareto_front()
     plot_pareto_npv_vs_em()
     #plot_prod_data()
     plt.show()

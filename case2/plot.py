@@ -112,12 +112,12 @@ def pareto_front():
     
     # labels and stuff
     ax[0].set_ylabel('NPV [Billion USD]')
-    ax[0].set_xlabel('Emissions [kilo tonnes]')
+    ax[0].set_xlabel('Emissions [kilotonnes]')
     ax[0].set_title('wind + gas')
     ax[0].legend(loc='lower right', frameon=True, framealpha=1)
 
     ax[1].legend(loc=(1.01, 0.075), fontsize=11)
-    ax[1].set_xlabel('Emissions [kilo tonnes]')
+    ax[1].set_xlabel('Emissions [kilotonnes]')
     ax[1].set_title('only gas')
         
     plt.tight_layout()
@@ -215,90 +215,108 @@ def controls():
 def production():
 
     weights = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-    fig, ax = plt.subplots(nrows=3, ncols=2, sharex=True, sharey='row', figsize=(10, 6))
+    fig, ax = plt.subplots(nrows=4, ncols=2, sharex=True, sharey='row', figsize=(10, 12))
     fig.autofmt_xdate(ha='center')
     colors  = mpl.cm.get_cmap(COLOR_MAP)
 
-    for weight in weights:
+    for w, weight in enumerate(weights):
 
         ##################### WIND ###################
-        file_w = f'pareto_wind/weight_{weight}/eval.npz'
+        file_w = f'pareto_wind/weight_{weight}/eval_50.npz'
         prod_data_w = np.load(file_w, allow_pickle=True)['pred_data']
+        emissions_w = np.load(file_w, allow_pickle=True)['emissions'].mean(axis=0)/1000
+        emissions_w = np.insert(emissions_w, 0, 0)
 
-        fwit_w = []
+        fwpt_w = []
         fgpt_w = []
         fopt_w = []
 
-        fwit_nw = []
-        fgpt_nw = []
-        fopt_nw = []
-
         for data in prod_data_w:
-            fwit_w.append(data['fwit'].squeeze())
+            fwpt_w.append(data['fwpt'].squeeze())
             fgpt_w.append(data['fgpt'].squeeze())
             fopt_w.append(data['fopt'].squeeze())
 
         
         ax[0,0].plot(DATES,
-                     fwit_w,
-                     color=colors(weight))
+                     fopt_w,
+                     color=colors(weight),
+                     zorder=len(weights)-w)
         
         ax[1,0].plot(DATES,
                      fgpt_w,
-                     color=colors(weight))
+                     color=colors(weight),
+                     zorder=len(weights)-w)
         
         ax[2,0].plot(DATES,
-                     fopt_w,
-                     color=colors(weight))
+                     fwpt_w,
+                     color=colors(weight),
+                     zorder=len(weights)-w)
+        
+        ax[3,0].plot(DATES,
+                     np.cumsum(emissions_w),
+                     color=colors(weight),
+                     zorder=len(weights)-w)
         
 
         ##################### NO WIND ###################
         file_nw = f'pareto_nowind/weight_{weight}/eval.npz'
         prod_data_nw = np.load(file_nw, allow_pickle=True)['pred_data']
+        emissions_nw = np.load(file_nw, allow_pickle=True)['emissions'].squeeze()/1000
+        emissions_nw = np.insert(emissions_nw, 0, 0)
 
-        fwit_nw = []
+        fwpt_nw = []
         fgpt_nw = []
         fopt_nw = []
 
         for data in prod_data_nw:
-            fwit_nw.append(data['fwit'].squeeze())
+            fwpt_nw.append(data['fwpt'].squeeze())
             fgpt_nw.append(data['fgpt'].squeeze())
             fopt_nw.append(data['fopt'].squeeze())
 
 
         ax[0,1].plot(DATES,
-                     fwit_nw,
-                     color=colors(weight))
+                     fopt_nw,
+                     color=colors(weight),
+                     zorder=len(weights)-w)
         
         ax[1,1].plot(DATES,
                      fgpt_nw,
                      color=colors(weight),
-                     label=rf'$\omega={weight}$')
+                     label=rf'${weight}$',
+                     zorder=len(weights)-w)
         
         ax[2,1].plot(DATES,
-                     fopt_nw,
-                     color=colors(weight))
+                     fwpt_nw,
+                     color=colors(weight),
+                     zorder=len(weights)-w)
+        
+        ax[3,1].plot(DATES,
+                     np.cumsum(emissions_nw),
+                     color=colors(weight),
+                     zorder=len(weights)-w)
 
     # labels and titles
     ax[0,0].set_title('wind + gas')
     ax[0,1].set_title('only gas')
-    ax[1,1].legend(loc=(1.01, -0.25), fontsize=11, handlelength=1)
+    ax[1,1].legend(loc=(1.01, -0.8), fontsize=11, handlelength=1)
 
-    ax[0,0].set_ylabel(r'FWIT [Sm$^3$]', fontsize=11)
+    ax[0,0].set_ylabel(r'FOPT [Sm$^3$]', fontsize=11)
     ax[1,0].set_ylabel(r'FGPT [Sm$^3$]', fontsize=11)
-    ax[2,0].set_ylabel(r'FOPT [Sm$^3$]', fontsize=11)
+    ax[2,0].set_ylabel(r'FWPT [Sm$^3$]', fontsize=11)
+    ax[3,0].set_ylabel(r'Avg. Emissions [kilotonnes]', fontsize=11)
 
     #norm = mpl.colors.Normalize(vmin=0, vmax=1) 
-    #sm = plt.cm.ScalarMappable(cmap=colors, norm=norm) 
-    #sm.set_array([])
-    #cbar_ax = fig.add_axes([0.95, 0.15, 0.015, 0.7]) 
-    #plt.colorbar(sm, ax=ax[1,1], cax=cbar_ax) 
+    #boundarynorm = mpl.colors.BoundaryNorm(boundaries=weights, ncolors=colors.N)
+    #sm = plt.cm.ScalarMappable(cmap=colors) 
+    #cbar_ax = fig.add_axes([0.94, 0.15, 0.015, 0.7]) 
+    #cbar = plt.colorbar(sm, ax=ax[1,1], cax=cbar_ax, ticks=weights) 
+    #cbar.ax.locator_params(axis='y', nbins=len(weights)+1)
 
     plt.tight_layout()
-    plt.subplots_adjust(hspace=0.1)
+    plt.subplots_adjust(hspace=0.2)
     plt.draw()
 
-    fig.savefig('production.pdf')
+    fig.savefig('../figures/case2_production.pdf')
 
 
 def pareto_front_intensity():
@@ -520,7 +538,7 @@ def pareto_front_intensity():
 if __name__ == '__main__':
 
     pareto_front()
-    controls()
-    #production()
-    pareto_front_intensity()
+    #controls()
+    production()
+    #pareto_front_intensity()
     plt.show()
